@@ -8,7 +8,7 @@ import ImageDisplay from '@/components/ImageDisplay';
 import VoiceButton from '@/components/VoiceButton';
 import { editWithVoice, syncSession } from '@/services/api';
 import { File, Paths } from 'expo-file-system';
-import { writeAsStringAsync, EncodingType } from 'expo-file-system/legacy';
+import { EncodingType, writeAsStringAsync } from 'expo-file-system/legacy';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -102,7 +102,8 @@ export default function EditScreen() {
       if (imageUrl.startsWith('data:')) {
         // Convert base64 data URI to file
         const fileName = `dripfyre_${Date.now()}.jpg`;
-        const filePath = `${Paths.document}/${fileName}`;
+        const file = new File(Paths.document, fileName);
+        const filePath = file.uri;
 
         // Extract base64 data (remove data:image/xxx;base64, prefix)
         const base64Data = imageUrl.split(',')[1];

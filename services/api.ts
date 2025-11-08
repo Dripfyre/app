@@ -7,9 +7,11 @@ import { API_BASE_URL, API_ENDPOINTS } from '@/constants/config';
 import { FileSystemUploadType, uploadAsync } from 'expo-file-system/legacy';
 
 export interface SyncResponse {
-  imageUrl: string;
-  caption: string;
-  hashtag: string;
+  data: {
+    images: Array<{ base64: string }>;
+    caption: string;
+    hashtags: string;
+  };
 }
 
 export interface UploadResponse {
