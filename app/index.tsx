@@ -19,6 +19,7 @@ import {
   Dimensions,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -27,15 +28,30 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming
+} from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
+
+// Import the timeline modal component
+import TimelineModal from '@/components/TimelineModal';
 
 export default function LandingScreen() {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState<string>('');
+  const [showTimeline, setShowTimeline] = useState(false);
+
+  // Animated value for glowing arrows
+  const arrowGlow = useSharedValue(1);
 
   useEffect(() => {
     // Generate session ID on mount
@@ -45,6 +61,16 @@ export default function LandingScreen() {
 
     // Load or generate user name
     getUserName().then(setUserName);
+
+    // Start glowing animation for arrows
+    arrowGlow.value = withRepeat(
+      withSequence(
+        withTiming(1.5, { duration: 1000 }),
+        withTiming(1, { duration: 1000 })
+      ),
+      -1,
+      false
+    );
   }, []);
 
   const handleNameChange = (text: string) => {
@@ -124,6 +150,19 @@ export default function LandingScreen() {
       setLoading(false);
     }
   };
+
+  const handleOpenTimeline = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowTimeline(true);
+  };
+
+  // Animated style for glowing arrows
+  const arrowAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: arrowGlow.value,
+      transform: [{ scale: arrowGlow.value }],
+    };
+  });
 
   return (
     <View style={styles.container}>
@@ -207,12 +246,30 @@ export default function LandingScreen() {
                 </Animated.View>
               </View>
             </View>
-            <Text style={styles.tagline}>
-              You Are 🔥 🔥 🔥
-            </Text>
           </View>
+
+          {/* Glowing Arrows for Timeline - at bottom */}
+          <Animated.View entering={FadeInDown.delay(600).duration(800)} style={styles.timelineIndicator}>
+            <TouchableOpacity
+              onPress={handleOpenTimeline}
+              activeOpacity={0.7}
+              style={styles.arrowContainer}
+            >
+              <Animated.View style={arrowAnimatedStyle}>
+                <View style={styles.arrowsRow}>
+                  <Text style={styles.arrow}>↓</Text>
+                  <Text style={[styles.arrow, styles.arrowMiddle]}>↓</Text>
+                  <Text style={styles.arrow}>↓</Text>
+                </View>
+                <Text style={styles.timelineHint}>Tap for Timeline</Text>
+              </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Timeline Modal */}
+      <TimelineModal visible={showTimeline} onClose={() => setShowTimeline(false)} />
     </View>
   );
 }
@@ -230,27 +287,27 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 20,
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingTop: 80,
+    paddingBottom: 20,
   },
   headerContainer: {
     alignItems: 'center',
-    gap: 20,
-    marginBottom: 40,
+    gap: 16,
+    marginBottom: 30,
   },
   logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 8,
+    width: 100,
+    height: 100,
+    marginBottom: 4,
   },
   nameInputContainer: {
     width: '100%',
     maxWidth: 300,
     gap: 8,
-    marginBottom: 40,
+    marginBottom: 30,
   },
   nameLabel: {
     fontSize: 14,
@@ -305,6 +362,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
+    marginBottom: 10,
   },
   button: {
     flex: 1,
@@ -354,5 +412,41 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#000000',
     letterSpacing: 0.3,
+  },
+  timelineIndicator: {
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingBottom: 50,
+    backgroundColor: '#000000',
+  },
+  arrowContainer: {
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+  },
+  arrowsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  arrow: {
+    fontSize: 36,
+    color: '#00E0C0',
+    fontWeight: '800',
+    textShadowColor: '#00E0C0',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
+  },
+  arrowMiddle: {
+    fontSize: 42,
+    textShadowRadius: 20,
+  },
+  timelineHint: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.8)',
+    letterSpacing: 0.8,
+    marginTop: 2,
   },
 });

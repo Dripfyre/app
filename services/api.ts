@@ -150,3 +150,65 @@ export async function postSession(sessionId: string, name: string): Promise<void
     throw error;
   }
 }
+
+export interface TimelinePost {
+  sessionId: string;
+  name: string;
+  timestamp: number;
+  createdAt: string;
+  images: Array<{
+    url: string;
+    base64: string;
+    mimeType: string;
+  }>;
+  caption: string;
+  hashtags: string;
+}
+
+export interface TimelinePagination {
+  currentPage: number;
+  totalPages: number;
+  totalPosts: number;
+  postsPerPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface TimelineResponse {
+  success: boolean;
+  data: {
+    posts: TimelinePost[];
+    pagination: TimelinePagination;
+  };
+}
+
+/**
+ * Fetch timeline posts with pagination
+ */
+export async function fetchTimeline(page: number = 1, limit: number = 10): Promise<TimelineResponse> {
+  try {
+    console.log("Fetching timeline", new Date().toISOString());
+    const url = `${API_BASE_URL}${API_ENDPOINTS.timeline}?page=${page}&limit=${limit}`;
+    console.log("Fetching timeline from:", url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log("Timeline response status:", response.status);
+
+    if (!response.ok) {
+      throw new Error(`Timeline fetch failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Timeline fetched successfully");
+    return data;
+  } catch (error) {
+    console.error('Timeline fetch error:', error);
+    throw error;
+  }
+}

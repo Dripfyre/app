@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
   sync: (sessionId: string) => `/api/v1/${sessionId}/sync`,
   edit: (sessionId: string) => `/api/v1/${sessionId}/edit`,
   post: (sessionId: string) => `/api/v1/${sessionId}/post`,
+  timeline: '/api/v1/timeline',
 } as const;
 
 /**

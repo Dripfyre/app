@@ -399,22 +399,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   button: {
-    flex: 1,
-    maxWidth: 170,
+    width: 160,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonGradient: {
     borderRadius: 32,
-    paddingVertical: 20,
-    paddingHorizontal: 32,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 64,
+    minHeight: 56,
     shadowColor: BrandColors.teal,
     shadowOffset: {
       width: 0,

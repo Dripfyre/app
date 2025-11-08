@@ -314,10 +314,13 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   postButtonGradient: {
-    paddingHorizontal: 48,
-    paddingVertical: 18,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     borderRadius: 32,
-    minWidth: 160,
+    width: 160,
+    minHeight: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   postButtonText: {
     fontSize: 19,
