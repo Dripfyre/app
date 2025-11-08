@@ -3,6 +3,7 @@
  * Shows caption and hashtag without labels
  */
 
+import { BrandColors } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -18,7 +19,7 @@ export default function CaptionBox({ caption, hashtag }: CaptionBoxProps) {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={hasContent ? ['#ffffff', '#f9f9f9'] : ['#f5f5f5', '#ececec']}
+        colors={hasContent ? ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.1)'] : ['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.05)']}
         style={styles.gradient}
       >
         <View style={styles.content}>
@@ -51,19 +52,22 @@ export default function CaptionBox({ caption, hashtag }: CaptionBoxProps) {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 224, 192, 0.3)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    shadowColor: BrandColors.teal,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 0,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   gradient: {
     padding: 20,
+    borderRadius: 19,
   },
   content: {
     gap: 16,
@@ -86,21 +90,21 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     lineHeight: 22,
-    color: '#333',
+    color: BrandColors.white,
     fontWeight: '500',
   },
   hashtag: {
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-    color: '#667eea',
-    fontWeight: '600',
+    color: BrandColors.limeGreen,
+    fontWeight: '700',
   },
   placeholder: {
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-    color: '#999',
+    color: 'rgba(255, 255, 255, 0.5)',
     fontStyle: 'italic',
   },
   divider: {

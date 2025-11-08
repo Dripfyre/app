@@ -3,27 +3,28 @@
  * Shows posted image with caption and hashtag, and options to start new session
  */
 
-import React, { useState, useEffect } from 'react';
+import { BLANK_IMAGE_URL } from '@/constants/config';
+import { BrandColors } from '@/constants/theme';
+import { uploadImage } from '@/services/api';
+import { clearSessionId, generateSessionId, saveSessionId } from '@/utils/session';
+import { File, Paths } from 'expo-file-system';
+import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
   Dimensions,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeIn, FadeInDown, ZoomIn, FadeInUp } from 'react-native-reanimated';
-import * as ImagePicker from 'expo-image-picker';
-import { File, Paths } from 'expo-file-system';
-import * as Haptics from 'expo-haptics';
-import { generateSessionId, saveSessionId, clearSessionId } from '@/utils/session';
-import { uploadImage } from '@/services/api';
-import { BLANK_IMAGE_URL } from '@/constants/config';
+import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
@@ -113,7 +114,7 @@ export default function SuccessScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#667eea', '#764ba2', '#f093fb']}
+        colors={[BrandColors.black, BrandColors.black]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
@@ -123,15 +124,15 @@ export default function SuccessScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Success Header */}
-          <Animated.View entering={ZoomIn.duration(600)} style={styles.successIconContainer}>
+          {/* <Animated.View entering={ZoomIn.duration(600)} style={styles.successIconContainer}>
             <View style={styles.successIcon}>
-              <Text style={styles.successEmoji}>✨</Text>
+              <Text style={styles.successEmoji}>💅🏻</Text>
             </View>
-          </Animated.View>
+          </Animated.View> */}
 
           <Animated.View entering={FadeIn.delay(300).duration(600)} style={styles.headerContainer}>
-            <Text style={styles.title}>Posted Successfully!</Text>
-            <Text style={styles.subtitle}>Your masterpiece is ready to shine</Text>
+            <Text style={styles.title}>Done !</Text>
+            <Text style={styles.subtitle}>Your masterpiece is ready to shine 💅🏻</Text>
           </Animated.View>
 
           {/* Preview Card */}
@@ -151,14 +152,12 @@ export default function SuccessScreen() {
               <View style={styles.textContent}>
                 {params.caption && (
                   <View style={styles.textRow}>
-                    <Text style={styles.icon}>💬</Text>
                     <Text style={styles.caption} numberOfLines={2}>{params.caption}</Text>
                   </View>
                 )}
 
                 {params.hashtag && (
                   <View style={styles.textRow}>
-                    <Text style={styles.icon}>#</Text>
                     <Text style={styles.hashtag} numberOfLines={1}>{params.hashtag}</Text>
                   </View>
                 )}
@@ -178,18 +177,15 @@ export default function SuccessScreen() {
                 activeOpacity={0.8}
               >
                 <LinearGradient
-                  colors={['#ffffff', '#f0f0f0']}
+                  colors={[BrandColors.teal, BrandColors.fuchsia]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
                   style={styles.buttonGradient}
                 >
                   {loading ? (
-                    <ActivityIndicator size="large" color="#667eea" />
+                    <ActivityIndicator size="large" color={BrandColors.white} />
                   ) : (
-                    <>
-                      <View style={styles.buttonIconContainer}>
-                        <Text style={styles.buttonIcon}>📸</Text>
-                      </View>
-                      <Text style={styles.buttonText}>Upload Photo</Text>
-                    </>
+                    <Text style={styles.buttonText}>Upload</Text>
                   )}
                 </LinearGradient>
               </TouchableOpacity>
@@ -200,21 +196,13 @@ export default function SuccessScreen() {
                 disabled={loading}
                 activeOpacity={0.8}
               >
-                <LinearGradient
-                  colors={['#ffffff', '#f0f0f0']}
-                  style={styles.buttonGradient}
-                >
+                <View style={[styles.buttonGradient, styles.generateButton]}>
                   {loading ? (
-                    <ActivityIndicator size="large" color="#667eea" />
+                    <ActivityIndicator size="large" color={BrandColors.black} />
                   ) : (
-                    <>
-                      <View style={styles.buttonIconContainer}>
-                        <Text style={styles.buttonIcon}>✨</Text>
-                      </View>
-                      <Text style={styles.buttonText}>New Canvas</Text>
-                    </>
+                    <Text style={styles.generateButtonText}>Generate!</Text>
                   )}
-                </LinearGradient>
+                </View>
               </TouchableOpacity>
             </View>
           </Animated.View>
@@ -251,7 +239,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   successEmoji: {
-    fontSize: 50,
+    fontSize: 20,
   },
   headerContainer: {
     alignItems: 'center',
@@ -309,14 +297,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 20,
-    color: '#333',
+    color: BrandColors.black,
     fontWeight: '500',
   },
   hashtag: {
     flex: 1,
     fontSize: 13,
     lineHeight: 18,
-    color: '#667eea',
+    color: BrandColors.teal,
     fontWeight: '600',
   },
   createMoreContainer: {
@@ -334,42 +322,52 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   button: {
     flex: 1,
-    maxWidth: 160,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
+    maxWidth: 170,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonGradient: {
-    borderRadius: 20,
-    padding: 20,
-    alignItems: 'center',
-    gap: 8,
-  },
-  buttonIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+    borderRadius: 32,
+    paddingVertical: 20,
+    paddingHorizontal: 32,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  buttonIcon: {
-    fontSize: 28,
+    minHeight: 64,
+    shadowColor: BrandColors.teal,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+    elevation: 24,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
+    fontSize: 17,
+    fontWeight: '800',
+    color: BrandColors.white,
+    letterSpacing: 0.3,
+  },
+  generateButton: {
+    backgroundColor: BrandColors.limeGreen,
+    shadowColor: BrandColors.limeGreen,
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+    elevation: 24,
+  },
+  generateButtonText: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: BrandColors.black,
+    letterSpacing: 0.3,
   },
 });

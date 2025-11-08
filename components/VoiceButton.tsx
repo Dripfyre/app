@@ -3,25 +3,26 @@
  * Handles audio recording with visual feedback
  */
 
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
-  withSequence,
-  Easing
-} from 'react-native-reanimated';
+import { BrandColors } from '@/constants/theme';
 import {
-  useAudioRecorder,
-  useAudioRecorderState,
   RecordingPresets,
   getRecordingPermissionsAsync,
-  requestRecordingPermissionsAsync
+  requestRecordingPermissionsAsync,
+  useAudioRecorder,
+  useAudioRecorderState
 } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming
+} from 'react-native-reanimated';
 
 interface VoiceButtonProps {
   onRecordingComplete: (audioUri: string) => void;
@@ -133,9 +134,9 @@ export default function VoiceButton({ onRecordingComplete, disabled }: VoiceButt
         style={styles.touchable}
       >
         <LinearGradient
-          colors={isRecording ? ['#FF3B30', '#FF6B30'] : ['#667eea', '#764ba2']}
+          colors={isRecording ? [BrandColors.fuchsia, '#FF6B30'] : [BrandColors.teal, BrandColors.teal]}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          end={{ x: 1, y: 0 }}
           style={[styles.button, disabled && styles.buttonDisabled]}
         >
           {isRecording ? (
@@ -145,8 +146,8 @@ export default function VoiceButton({ onRecordingComplete, disabled }: VoiceButt
             </View>
           ) : (
             <View style={styles.recordingIndicator}>
-              <Text style={styles.icon}>🎤</Text>
-              <Text style={styles.buttonText}>Speak</Text>
+              <Text style={styles.buttonText}>Edit ˋˏ✄┈</Text>
+              {/* <Text style={styles.icon}>Edit -ˋˏ✄┈</Text> */}
             </View>
           )}
         </LinearGradient>
@@ -157,32 +158,32 @@ export default function VoiceButton({ onRecordingComplete, disabled }: VoiceButt
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    shadowColor: '#667eea',
+    shadowColor: BrandColors.teal,
     shadowOffset: {
       width: 0,
-      height: 6,
+      height: 0,
     },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 10,
+    shadowOpacity: 0.8,
+    shadowRadius: 16,
+    elevation: 16,
   },
   touchable: {
-    borderRadius: 28,
+    borderRadius: 32,
   },
   button: {
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 28,
-    minWidth: 140,
+    paddingHorizontal: 36,
+    paddingVertical: 18,
+    borderRadius: 32,
+    minWidth: 150,
   },
   buttonDisabled: {
     opacity: 0.5,
   },
   buttonText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#fff',
-    letterSpacing: 0.5,
+    fontSize: 18,
+    fontWeight: '800',
+    color: BrandColors.white,
+    letterSpacing: 0.3,
   },
   recordingIndicator: {
     flexDirection: 'row',

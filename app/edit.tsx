@@ -6,6 +6,7 @@
 import CaptionBox from '@/components/CaptionBox';
 import ImageDisplay from '@/components/ImageDisplay';
 import VoiceButton from '@/components/VoiceButton';
+import { BrandColors } from '@/constants/theme';
 import { editWithVoice, syncSession } from '@/services/api';
 import { File, Paths } from 'expo-file-system';
 import { EncodingType, writeAsStringAsync } from 'expo-file-system/legacy';
@@ -147,11 +148,11 @@ export default function EditScreen() {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#f7f8fc', '#eef1ff']}
+          colors={[BrandColors.black, BrandColors.black]}
           style={styles.gradient}
         >
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#667eea" />
+            <ActivityIndicator size="large" color={BrandColors.teal} />
             <Text style={styles.loadingText}>Loading your canvas...</Text>
           </View>
         </LinearGradient>
@@ -162,7 +163,7 @@ export default function EditScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#f7f8fc', '#eef1ff']}
+        colors={[BrandColors.black, BrandColors.black]}
         style={styles.gradient}
       >
         {/* Header - Pinned to Top */}
@@ -206,12 +207,12 @@ export default function EditScreen() {
             activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#667eea', '#764ba2']}
+              colors={[BrandColors.fuchsia, BrandColors.fuchsia]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.postButtonGradient}
             >
-              <Text style={styles.postButtonText}>Post 🚀</Text>
+              <Text style={styles.postButtonText}>Post ˋˏ🫳</Text>
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
@@ -235,7 +236,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#667eea',
+    color: BrandColors.teal,
     fontWeight: '600',
   },
   header: {
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#333',
+    color: BrandColors.white,
     letterSpacing: -0.5,
   },
   imageContainer: {
@@ -268,17 +269,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(102, 126, 234, 0.95)',
+    backgroundColor: 'rgba(0, 224, 192, 0.95)',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 20,
-    shadowColor: '#000',
+    shadowColor: BrandColors.teal,
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
     elevation: 4,
   },
   processingBadgeText: {
@@ -295,29 +296,29 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   postButton: {
-    shadowColor: '#667eea',
+    shadowColor: BrandColors.fuchsia,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 0,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOpacity: 0.8,
+    shadowRadius: 16,
+    elevation: 16,
   },
   postButtonDisabled: {
     opacity: 0.5,
   },
   postButtonGradient: {
-    paddingHorizontal: 40,
-    paddingVertical: 16,
-    borderRadius: 28,
-    minWidth: 140,
+    paddingHorizontal: 48,
+    paddingVertical: 18,
+    borderRadius: 32,
+    minWidth: 160,
   },
   postButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#fff',
+    fontSize: 19,
+    fontWeight: '800',
+    color: BrandColors.white,
     textAlign: 'center',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
 });

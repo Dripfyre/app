@@ -5,8 +5,17 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// DripFire brand colors
+export const BrandColors = {
+  teal: '#00E0C0',
+  fuchsia: '#FF0080',
+  limeGreen: '#A0FF00',
+  black: '#000000',
+  white: '#FFFFFF',
+};
+
+const tintColorLight = BrandColors.teal;
+const tintColorDark = BrandColors.teal;
 
 export const Colors = {
   light: {
@@ -18,11 +27,11 @@ export const Colors = {
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    text: BrandColors.white,
+    background: BrandColors.black,
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    icon: BrandColors.teal,
+    tabIconDefault: BrandColors.teal,
     tabIconSelected: tintColorDark,
   },
 };

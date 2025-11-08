@@ -3,10 +3,11 @@
  * Shows synced image with loading state
  */
 
-import React from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { BrandColors } from '@/constants/theme';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 interface ImageDisplayProps {
   imageUrl: string | null;
@@ -18,10 +19,10 @@ export default function ImageDisplay({ imageUrl, loading }: ImageDisplayProps) {
     <View style={styles.container}>
       {loading ? (
         <LinearGradient
-          colors={['#f0f0f0', '#e8e8e8']}
+          colors={['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
           style={styles.loadingContainer}
         >
-          <ActivityIndicator size="large" color="#667eea" />
+          <ActivityIndicator size="large" color={BrandColors.teal} />
         </LinearGradient>
       ) : imageUrl ? (
         <Image
@@ -32,7 +33,7 @@ export default function ImageDisplay({ imageUrl, loading }: ImageDisplayProps) {
         />
       ) : (
         <LinearGradient
-          colors={['#f5f5f5', '#ececec']}
+          colors={['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.05)']}
           style={styles.placeholderContainer}
         >
           <View style={styles.placeholder}>
@@ -53,15 +54,17 @@ const styles = StyleSheet.create({
     aspectRatio: 4 / 5, // Instagram/social media portrait ratio
     borderRadius: 20,
     overflow: 'hidden',
-    backgroundColor: '#fff',
-    shadowColor: '#000',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 224, 192, 0.3)',
+    shadowColor: BrandColors.teal,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 0,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
   },
   image: {
     width: '100%',
@@ -93,13 +96,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#d0d0d0',
+    backgroundColor: 'rgba(0, 224, 192, 0.3)',
     marginBottom: 8,
   },
   iconRect: {
     width: 80,
     height: 60,
     borderRadius: 8,
-    backgroundColor: '#d0d0d0',
+    backgroundColor: 'rgba(0, 224, 192, 0.3)',
   },
 });

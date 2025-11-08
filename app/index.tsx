@@ -16,6 +16,7 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -112,17 +113,21 @@ export default function LandingScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#667eea', '#764ba2', '#f093fb']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradient}
-      >
+      <View style={styles.background}>
         <View style={styles.content}>
           <Animated.View entering={FadeIn.duration(800)} style={styles.headerContainer}>
-            <Text style={styles.logo}>DripFyre</Text>
-            <Text style={styles.tagline}>Create. Edit. Post.</Text>
-            <Text style={styles.subtitle}>Transform your images with the power of voice</Text>
+            <Image 
+              source={require('@/assets/images/logo.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <View style={styles.brandContainer}>
+              <Text style={styles.brandDrip}>Drip</Text>
+              <Text style={styles.brandFire}>Fire</Text>
+            </View>
+            <Text style={styles.tagline}>
+              Go Viral. On <Text style={styles.taglineHighlight}>Autopilot.</Text>
+            </Text>
           </Animated.View>
 
           <View style={styles.buttonContainer}>
@@ -134,19 +139,15 @@ export default function LandingScreen() {
                 activeOpacity={0.8}
               >
                 <LinearGradient
-                  colors={['#ffffff', '#f0f0f0']}
+                  colors={['#00E0C0', '#FF0080']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
                   style={styles.buttonGradient}
                 >
                   {loading ? (
-                    <ActivityIndicator size="large" color="#667eea" />
+                    <ActivityIndicator size="large" color="#ffffff" />
                   ) : (
-                    <>
-                      <View style={styles.iconContainer}>
-                        <Text style={styles.icon}>📸</Text>
-                      </View>
-                      <Text style={styles.buttonText}>Upload Photo</Text>
-                      <Text style={styles.buttonSubtext}>Choose from gallery</Text>
-                    </>
+                    <Text style={styles.buttonText}>Upload</Text>
                   )}
                 </LinearGradient>
               </TouchableOpacity>
@@ -159,31 +160,19 @@ export default function LandingScreen() {
                 disabled={loading}
                 activeOpacity={0.8}
               >
-                <LinearGradient
-                  colors={['#ffffff', '#f0f0f0']}
-                  style={styles.buttonGradient}
-                >
+                <View style={[styles.buttonGradient, styles.generateButton]}>
                   {loading ? (
-                    <ActivityIndicator size="large" color="#667eea" />
+                    <ActivityIndicator size="large" color="#000000" />
                   ) : (
-                    <>
-                      <View style={styles.iconContainer}>
-                        <Text style={styles.icon}>✨</Text>
-                      </View>
-                      <Text style={styles.buttonText}>Generate Canvas</Text>
-                      <Text style={styles.buttonSubtext}>Start from blank</Text>
-                    </>
+                    <Text style={styles.generateButtonText}>Generate!</Text>
                   )}
-                </LinearGradient>
+                </View>
               </TouchableOpacity>
             </Animated.View>
           </View>
 
-          <Animated.Text entering={FadeIn.delay(600).duration(800)} style={styles.footerText}>
-          You Are 🔥🔥🔥
-          </Animated.Text>
         </View>
-      </LinearGradient>
+      </View>
     </View>
   );
 }
@@ -192,97 +181,110 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  gradient: {
+  background: {
     flex: 1,
+    backgroundColor: '#000000',
   },
   content: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    paddingTop: 80,
-    paddingBottom: 50,
+    paddingTop: 60,
+    paddingBottom: 40,
   },
   headerContainer: {
     alignItems: 'center',
-    gap: 12,
+    gap: 20,
+    marginBottom: 80,
   },
   logo: {
-    fontSize: 48,
+    width: 120,
+    height: 120,
+    marginBottom: 8,
+  },
+  brandContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandDrip: {
+    fontSize: 42,
     fontWeight: '800',
-    color: '#ffffff',
-    letterSpacing: -1,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
+    color: '#00E0C0',
+    letterSpacing: -0.5,
+  },
+  brandFire: {
+    fontSize: 42,
+    fontWeight: '800',
+    color: '#FF0080',
+    letterSpacing: -0.5,
   },
   tagline: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
     color: '#ffffff',
-    letterSpacing: 1,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
+    letterSpacing: 0.3,
     textAlign: 'center',
-    marginTop: 8,
-    paddingHorizontal: 40,
+  },
+  taglineHighlight: {
+    color: '#A0FF00',
   },
   buttonContainer: {
     width: '100%',
-    gap: 20,
+    flexDirection: 'row',
+    gap: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
   },
   button: {
-    width: width - 80,
-    maxWidth: 320,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 12,
+    flex: 1,
+    maxWidth: 170,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonGradient: {
-    borderRadius: 24,
-    padding: 24,
-    alignItems: 'center',
-    gap: 8,
-  },
-  iconContainer: {
-    width: 64,
-    height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+    paddingVertical: 20,
+    paddingHorizontal: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
-  },
-  icon: {
-    fontSize: 32,
+    minHeight: 64,
+    // Intense glow effect for gradient button
+    shadowColor: '#00E0C0',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+    elevation: 24,
   },
   buttonText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
-    letterSpacing: 0.5,
+    fontSize: 19,
+    fontWeight: '800',
+    color: '#ffffff',
+    letterSpacing: 0.3,
   },
-  buttonSubtext: {
-    fontSize: 13,
-    color: '#666',
-    fontWeight: '500',
+  generateButton: {
+    backgroundColor: '#A0FF00',
+    borderRadius: 32,
+    // Intense glow effect for lime green button
+    shadowColor: '#A0FF00',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 24,
+    elevation: 24,
   },
-  footerText: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontWeight: '600',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
+  generateButtonText: {
+    fontSize: 19,
+    fontWeight: '800',
+    color: '#000000',
+    letterSpacing: 0.3,
   },
 });
