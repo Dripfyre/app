@@ -170,9 +170,12 @@ export default function LandingScreen() {
               </TouchableOpacity>
             </Animated.View>
           </View>
-
         </View>
+        <Text style={styles.tagline}>
+              You Are 🔥 🔥 🔥
+          </Text>
       </View>
+      
     </View>
   );
 }
