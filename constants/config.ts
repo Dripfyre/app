@@ -3,6 +3,22 @@
  * Update API_BASE_URL with your backend server URL
  */
 
+import { getApiUrl } from '@/utils/apiConfig';
+
+// This will be set once on app start
+let cachedApiUrl: string | null = null;
+
+// Initialize API URL (call this on app start)
+export async function initializeApiUrl(): Promise<void> {
+  cachedApiUrl = await getApiUrl();
+}
+
+// Get the current API base URL (synchronous after initialization)
+export function getApiBaseUrl(): string {
+  return cachedApiUrl || process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+}
+
+// Export for backward compatibility (will use env initially, then cached value)
 export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 export const API_ENDPOINTS = {

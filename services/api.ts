@@ -3,7 +3,7 @@
  * Handles all backend API calls
  */
 
-import { API_BASE_URL, API_ENDPOINTS } from '@/constants/config';
+import { API_ENDPOINTS, getApiBaseUrl } from '@/constants/config';
 import { FileSystemUploadType, uploadAsync } from 'expo-file-system/legacy';
 
 export interface SyncResponse {
@@ -42,8 +42,9 @@ export async function uploadImage(sessionId: string, imageUri: string): Promise<
     
     console.log("passing this to upload api!!");
 
-    console.log(`${API_BASE_URL}${API_ENDPOINTS.upload(sessionId)}`);
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.upload(sessionId)}`, {
+    const apiBaseUrl = getApiBaseUrl();
+    console.log(`${apiBaseUrl}${API_ENDPOINTS.upload(sessionId)}`);
+    const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.upload(sessionId)}`, {
       method: 'POST',
       body: formData,
       // DO NOT set Content-Type header - let fetch set it automatically with boundary
@@ -67,7 +68,8 @@ export async function uploadImage(sessionId: string, imageUri: string): Promise<
 export async function syncSession(sessionId: string): Promise<SyncResponse> {
   try {
     console.log("Making sync call", new Date().toISOString());
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.sync(sessionId)}`, {
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}${API_ENDPOINTS.sync(sessionId)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -95,7 +97,8 @@ export async function editWithVoice(sessionId: string, audioUri: string): Promis
     console.log("Making edit call", new Date().toISOString());
     console.log("Audio URI:", audioUri);
 
-    const url = `${API_BASE_URL}${API_ENDPOINTS.edit(sessionId)}`;
+    const apiBaseUrl = getApiBaseUrl();
+    const url = `${apiBaseUrl}${API_ENDPOINTS.edit(sessionId)}`;
     console.log("Sending edit request to:", url);
 
     // Use uploadAsync for reliable file uploads in React Native
@@ -127,7 +130,8 @@ export async function postSession(sessionId: string, name: string): Promise<void
   try {
     console.log("Making post call", new Date().toISOString());
     console.log("Name:", name);
-    const url = `${API_BASE_URL}${API_ENDPOINTS.post(sessionId)}`;
+    const apiBaseUrl = getApiBaseUrl();
+    const url = `${apiBaseUrl}${API_ENDPOINTS.post(sessionId)}`;
     console.log("Sending post request to:", url);
 
     const response = await fetch(url, {
@@ -188,7 +192,8 @@ export interface TimelineResponse {
 export async function fetchTimeline(page: number = 1, limit: number = 10): Promise<TimelineResponse> {
   try {
     console.log("Fetching timeline", new Date().toISOString());
-    const url = `${API_BASE_URL}${API_ENDPOINTS.timeline}?page=${page}&limit=${limit}`;
+    const apiBaseUrl = getApiBaseUrl();
+    const url = `${apiBaseUrl}${API_ENDPOINTS.timeline}?page=${page}&limit=${limit}`;
     console.log("Fetching timeline from:", url);
 
     const response = await fetch(url, {

@@ -3,7 +3,9 @@
  * User can upload an image from gallery or generate with a blank template
  */
 
-import { BLANK_IMAGE_URL } from '@/constants/config';
+import ApiSettingsModal from '@/components/ApiSettingsModal';
+import TimelineModal from '@/components/TimelineModal';
+import { BLANK_IMAGE_URL, initializeApiUrl } from '@/constants/config';
 import { uploadImage } from '@/services/api';
 import { generateSessionId, saveSessionId } from '@/utils/session';
 import { getUserName, saveUserName } from '@/utils/userName';
@@ -12,7 +14,7 @@ import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -20,6 +22,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -34,9 +37,6 @@ import Animated, {
 
 const { width } = Dimensions.get('window');
 
-// Import the timeline modal component
-import TimelineModal from '@/components/TimelineModal';
-
 export default function LandingScreen() {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string>('');
@@ -44,8 +44,16 @@ export default function LandingScreen() {
   const [generateLoading, setGenerateLoading] = useState(false);
   const [userName, setUserName] = useState<string>('');
   const [showTimeline, setShowTimeline] = useState(false);
+  const [showApiSettings, setShowApiSettings] = useState(false);
+
+  // Triple-tap detection
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    // Initialize API URL from storage
+    initializeApiUrl();
+
     // Generate session ID on mount
     const newSessionId = generateSessionId();
     setSessionId(newSessionId);
@@ -144,6 +152,28 @@ export default function LandingScreen() {
     setShowTimeline(true);
   };
 
+  const handleLogoPress = () => {
+    tapCountRef.current += 1;
+
+    // Clear any existing timer
+    if (tapTimerRef.current) {
+      clearTimeout(tapTimerRef.current);
+    }
+
+    // If triple tap detected, open settings
+    if (tapCountRef.current === 3) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setShowApiSettings(true);
+      tapCountRef.current = 0;
+      return;
+    }
+
+    // Reset tap count after 500ms
+    tapTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+    }, 500);
+  };
+
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView
@@ -159,11 +189,13 @@ export default function LandingScreen() {
           <View style={styles.background}>
             <View style={styles.content}>
               <Animated.View entering={FadeIn.duration(800)} style={styles.headerContainer}>
-                <Image
-                  source={require('@/assets/images/logo.png')}
-                  style={styles.logo}
-                  resizeMode="contain"
-                />
+                <Pressable onPress={handleLogoPress}>
+                  <Image
+                    source={require('@/assets/images/logo.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                  />
+                </Pressable>
                 <View style={styles.brandContainer}>
                   <Text style={styles.brandDrip}>Drip</Text>
                   <Text style={styles.brandFire}>Fire</Text>
@@ -244,6 +276,9 @@ export default function LandingScreen() {
 
       {/* Timeline Modal */}
       <TimelineModal visible={showTimeline} onClose={() => setShowTimeline(false)} />
+
+      {/* API Settings Modal (hidden, accessible via triple-tap on logo) */}
+      <ApiSettingsModal visible={showApiSettings} onClose={() => setShowApiSettings(false)} />
     </View>
   );
 }
