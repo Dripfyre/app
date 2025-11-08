@@ -214,7 +214,7 @@ export default function LandingScreen() {
                   {loading ? (
                     <ActivityIndicator size="large" color="#000000" />
                   ) : (
-                    <Text style={styles.generateButtonText}>Generate!</Text>
+                    <Text style={styles.generateButtonText}>Generate</Text>
                   )}
                 </View>
               </TouchableOpacity>

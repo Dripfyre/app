@@ -51,7 +51,7 @@ export default function ImageDisplay({ imageUrl, loading }: ImageDisplayProps) {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    aspectRatio: 4 / 5, // Instagram/social media portrait ratio
+    aspectRatio: 1, // Square ratio like success page
     borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -68,7 +68,8 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: '100%',
+    aspectRatio: 1,
+    borderRadius: 12,
   },
   loadingContainer: {
     flex: 1,
