@@ -6,6 +6,7 @@
 import PostCard from '@/components/PostCard';
 import { BrandColors } from '@/constants/theme';
 import { fetchTimeline, TimelinePost } from '@/services/api';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -25,6 +26,7 @@ interface TimelineModalProps {
 }
 
 export default function TimelineModal({ visible, onClose }: TimelineModalProps) {
+  const router = useRouter();
   const [posts, setPosts] = useState<TimelinePost[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -101,6 +103,11 @@ export default function TimelineModal({ visible, onClose }: TimelineModalProps) 
     );
   };
 
+  const handleClose = () => {
+    onClose();
+    router.push('/');
+  };
+
   if (!visible) return null;
 
   return (
@@ -108,7 +115,7 @@ export default function TimelineModal({ visible, onClose }: TimelineModalProps) 
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View style={styles.modalContainer}>
         {/* Header */}
@@ -116,7 +123,7 @@ export default function TimelineModal({ visible, onClose }: TimelineModalProps) 
             <View style={styles.headerContent}>
               <TouchableOpacity
                 style={styles.closeButton}
-                onPress={onClose}
+                onPress={handleClose}
                 activeOpacity={0.7}
               >
                 <Text style={styles.closeButtonText}>✕</Text>

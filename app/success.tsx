@@ -3,42 +3,34 @@
  * Shows posted image with caption and hashtag, and options to start new session
  */
 
-import { BLANK_IMAGE_URL } from '@/constants/config';
 import { BrandColors } from '@/constants/theme';
-import { uploadImage } from '@/services/api';
-import { clearSessionId, generateSessionId, saveSessionId } from '@/utils/session';
+import { clearSessionId } from '@/utils/session';
 import * as Clipboard from 'expo-clipboard';
-import { File, Paths } from 'expo-file-system';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Sharing from 'expo-sharing';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import TimelineModal from '@/components/TimelineModal';
 import {
-  ActivityIndicator,
   Alert,
-  Dimensions,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
-
-const { width } = Dimensions.get('window');
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 export default function SuccessScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams<{
     imageUri: string;
     caption: string;
     hashtag: string;
   }>();
 
-  const [loading, setLoading] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
 
   useEffect(() => {
     // Clear old session on mount
@@ -82,70 +74,9 @@ export default function SuccessScreen() {
     }
   };
 
-  const handleImagePicked = async (imageUri: string) => {
-    setLoading(true);
-
-    try {
-      // Generate new session ID
-      const newSessionId = generateSessionId();
-      await saveSessionId(newSessionId);
-
-      // Upload image to backend
-      await uploadImage(newSessionId, imageUri);
-
-      // Navigate to edit screen
-      router.replace({
-        pathname: '/edit',
-        params: { sessionId: newSessionId },
-      });
-    } catch (error) {
-      Alert.alert('Upload Error', 'Failed to upload image. Please try again.');
-      console.error('Upload error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUploadFromGallery = async () => {
+  const handleOpenTimeline = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-    // Request permissions
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permissionResult.granted) {
-      Alert.alert('Permission Required', 'Please grant permission to access your photo library.');
-      return;
-    }
-
-    // Launch image picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      allowsEditing: true,
-      quality: 0.8,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      await handleImagePicked(result.assets[0].uri);
-    }
-  };
-
-  const handleGenerate = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setLoading(true);
-
-    try {
-      // Download blank image to local file system using new File API
-      const fileName = `blank_${Date.now()}.png`;
-      const file = new File(Paths.cache, fileName);
-
-      await File.downloadFileAsync(BLANK_IMAGE_URL, file);
-
-      await handleImagePicked(file.uri);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load blank image. Please try again.');
-      console.error('Generate error:', error);
-      setLoading(false);
-    }
+    setShowTimeline(true);
   };
 
   return (
@@ -218,49 +149,22 @@ export default function SuccessScreen() {
             </LinearGradient>
           </Animated.View>
 
-          {/* Create More Section */}
-          <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.createMoreContainer}>
-            <Text style={styles.createMoreTitle}>Create More Magic</Text>
-
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
-                onPress={handleUploadFromGallery}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={[BrandColors.teal, BrandColors.fuchsia]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.buttonGradient}
-                >
-                  {loading ? (
-                    <ActivityIndicator size="large" color={BrandColors.white} />
-                  ) : (
-                    <Text style={styles.buttonText}>Upload</Text>
-                  )}
-                </LinearGradient>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
-                onPress={handleGenerate}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.buttonGradient, styles.generateButton]}>
-                  {loading ? (
-                    <ActivityIndicator size="large" color={BrandColors.black} />
-                  ) : (
-                    <Text style={styles.generateButtonText}>Generate!</Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
+          {/* Timeline indicator - static - pinned to bottom */}
+          <View style={styles.timelineIndicator}>
+            <TouchableOpacity
+              onPress={handleOpenTimeline}
+              activeOpacity={0.7}
+              style={styles.arrowContainer}
+            >
+              <Text style={styles.timelineHint}>Timeline</Text>
+              <Text style={styles.timelineArrow}>↓</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </LinearGradient>
+
+      {/* Timeline Modal */}
+      <TimelineModal visible={showTimeline} onClose={() => setShowTimeline(false)} />
     </View>
   );
 }
@@ -277,7 +181,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
     paddingBottom: 40,
-    gap: 24,
+    gap: 12,
   },
   successIconContainer: {
     alignItems: 'center',
@@ -384,66 +288,28 @@ const styles = StyleSheet.create({
     color: BrandColors.teal,
     fontWeight: '600',
   },
-  createMoreContainer: {
-    gap: 20,
-    marginTop: 8,
-  },
-  createMoreTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#ffffff',
-    textAlign: 'center',
-    letterSpacing: 0.5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 12,
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-  },
-  button: {
-    width: 160,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonGradient: {
-    borderRadius: 32,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+  timelineIndicator: {
     alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-    shadowColor: BrandColors.teal,
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 24,
-    elevation: 24,
+    paddingTop: 12,
+    paddingBottom: 30,
+    backgroundColor: '#000000',
   },
-  buttonText: {
-    fontSize: 17,
+  arrowContainer: {
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 20,
+    paddingHorizontal: 50,
+  },
+  timelineArrow: {
+    fontSize: 64,
+    color: 'rgba(255, 255, 255, 0.95)',
     fontWeight: '800',
-    color: BrandColors.white,
-    letterSpacing: 0.3,
+    lineHeight: 64,
   },
-  generateButton: {
-    backgroundColor: BrandColors.limeGreen,
-    shadowColor: BrandColors.limeGreen,
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 24,
-    elevation: 24,
-  },
-  generateButtonText: {
-    fontSize: 17,
+  timelineHint: {
+    fontSize: 24,
     fontWeight: '800',
-    color: BrandColors.black,
-    letterSpacing: 0.3,
+    color: 'rgba(255, 255, 255, 0.95)',
+    letterSpacing: 1.2,
   },
 });
