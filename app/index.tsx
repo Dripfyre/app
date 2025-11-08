@@ -6,6 +6,7 @@
 import { BLANK_IMAGE_URL } from '@/constants/config';
 import { uploadImage } from '@/services/api';
 import { generateSessionId, saveSessionId } from '@/utils/session';
+import { getUserName, saveUserName } from '@/utils/userName';
 import { File, Paths } from 'expo-file-system';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
@@ -17,8 +18,12 @@ import {
   Alert,
   Dimensions,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
@@ -30,13 +35,22 @@ export default function LandingScreen() {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
     // Generate session ID on mount
     const newSessionId = generateSessionId();
     setSessionId(newSessionId);
     saveSessionId(newSessionId);
+
+    // Load or generate user name
+    getUserName().then(setUserName);
   }, []);
+
+  const handleNameChange = (text: string) => {
+    setUserName(text);
+    saveUserName(text);
+  };
 
   const handleImagePicked = async (imageUri: string) => {
     if (!sessionId) {
@@ -113,69 +127,92 @@ export default function LandingScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.background}>
-        <View style={styles.content}>
-          <Animated.View entering={FadeIn.duration(800)} style={styles.headerContainer}>
-            <Image 
-              source={require('@/assets/images/logo.png')} 
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            <View style={styles.brandContainer}>
-              <Text style={styles.brandDrip}>Drip</Text>
-              <Text style={styles.brandFire}>Fire</Text>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.background}>
+            <View style={styles.content}>
+              <Animated.View entering={FadeIn.duration(800)} style={styles.headerContainer}>
+                <Image
+                  source={require('@/assets/images/logo.png')}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
+                <View style={styles.brandContainer}>
+                  <Text style={styles.brandDrip}>Drip</Text>
+                  <Text style={styles.brandFire}>Fire</Text>
+                </View>
+                <Text style={styles.tagline}>
+                  Go Viral. On <Text style={styles.taglineHighlight}>Autopilot.</Text>
+                </Text>
+              </Animated.View>
+
+              <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.nameInputContainer}>
+                <Text style={styles.nameLabel}>Your Name</Text>
+                <TextInput
+                  style={styles.nameInput}
+                  value={userName}
+                  onChangeText={handleNameChange}
+                  placeholder="Enter your name"
+                  placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                  maxLength={30}
+                />
+              </Animated.View>
+
+              <View style={styles.buttonContainer}>
+                <Animated.View entering={FadeInDown.delay(200).duration(600)}>
+                  <TouchableOpacity
+                    style={[styles.button, loading && styles.buttonDisabled]}
+                    onPress={handleUploadFromGallery}
+                    disabled={loading}
+                    activeOpacity={0.8}
+                  >
+                    <LinearGradient
+                      colors={['#00E0C0', '#FF0080']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.buttonGradient}
+                    >
+                      {loading ? (
+                        <ActivityIndicator size="large" color="#ffffff" />
+                      ) : (
+                        <Text style={styles.buttonText}>Upload</Text>
+                      )}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </Animated.View>
+
+                <Animated.View entering={FadeInDown.delay(400).duration(600)}>
+                  <TouchableOpacity
+                    style={[styles.button, loading && styles.buttonDisabled]}
+                    onPress={handleGenerate}
+                    disabled={loading}
+                    activeOpacity={0.8}
+                  >
+                    <View style={[styles.buttonGradient, styles.generateButton]}>
+                      {loading ? (
+                        <ActivityIndicator size="large" color="#000000" />
+                      ) : (
+                        <Text style={styles.generateButtonText}>Generate!</Text>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                </Animated.View>
+              </View>
             </View>
             <Text style={styles.tagline}>
-              Go Viral. On <Text style={styles.taglineHighlight}>Autopilot.</Text>
-            </Text>
-          </Animated.View>
-
-          <View style={styles.buttonContainer}>
-            <Animated.View entering={FadeInDown.delay(200).duration(600)}>
-              <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
-                onPress={handleUploadFromGallery}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                <LinearGradient
-                  colors={['#00E0C0', '#FF0080']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.buttonGradient}
-                >
-                  {loading ? (
-                    <ActivityIndicator size="large" color="#ffffff" />
-                  ) : (
-                    <Text style={styles.buttonText}>Upload</Text>
-                  )}
-                </LinearGradient>
-              </TouchableOpacity>
-            </Animated.View>
-
-            <Animated.View entering={FadeInDown.delay(400).duration(600)}>
-              <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
-                onPress={handleGenerate}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.buttonGradient, styles.generateButton]}>
-                  {loading ? (
-                    <ActivityIndicator size="large" color="#000000" />
-                  ) : (
-                    <Text style={styles.generateButtonText}>Generate!</Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </View>
-        <Text style={styles.tagline}>
               You Are 🔥 🔥 🔥
-          </Text>
-      </View>
-      
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -183,6 +220,9 @@ export default function LandingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
   },
   background: {
     flex: 1,
@@ -199,12 +239,37 @@ const styles = StyleSheet.create({
   headerContainer: {
     alignItems: 'center',
     gap: 20,
-    marginBottom: 80,
+    marginBottom: 40,
   },
   logo: {
     width: 120,
     height: 120,
     marginBottom: 8,
+  },
+  nameInputContainer: {
+    width: '100%',
+    maxWidth: 300,
+    gap: 8,
+    marginBottom: 40,
+  },
+  nameLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+  nameInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#ffffff',
+    textAlign: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   brandContainer: {
     flexDirection: 'row',

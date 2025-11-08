@@ -7,11 +7,13 @@ import { BLANK_IMAGE_URL } from '@/constants/config';
 import { BrandColors } from '@/constants/theme';
 import { uploadImage } from '@/services/api';
 import { clearSessionId, generateSessionId, saveSessionId } from '@/utils/session';
+import * as Clipboard from 'expo-clipboard';
 import { File, Paths } from 'expo-file-system';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Sharing from 'expo-sharing';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -44,6 +46,41 @@ export default function SuccessScreen() {
     // Success haptic
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, []);
+
+  const handleShare = async () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      // Combine caption and hashtags
+      const shareText = `${params.caption}\n\n${params.hashtag}`;
+
+      // Copy to clipboard first (so user can paste it)
+      await Clipboard.setStringAsync(shareText);
+
+      if (!params.imageUri) {
+        Alert.alert('Copied!', 'Caption and hashtags copied to clipboard.');
+        return;
+      }
+
+      // Check if sharing is available
+      const isAvailable = await Sharing.isAvailableAsync();
+
+      if (!isAvailable) {
+        Alert.alert('Copied!', 'Caption and hashtags copied to clipboard. Sharing is not available on this device.');
+        return;
+      }
+
+      // Share the image file - caption is already copied to clipboard
+      await Sharing.shareAsync(params.imageUri, {
+        mimeType: 'image/jpeg',
+        dialogTitle: shareText,
+        UTI: 'public.jpeg',
+      });
+    } catch (error) {
+      console.error('Error sharing:', error);
+      Alert.alert('Copied!', 'Caption and hashtags copied to clipboard. Please paste when sharing.');
+    }
+  };
 
   const handleImagePicked = async (imageUri: string) => {
     setLoading(true);
@@ -162,6 +199,22 @@ export default function SuccessScreen() {
                   </View>
                 )}
               </View>
+
+              {/* Share Button */}
+              <TouchableOpacity
+                style={styles.shareButton}
+                onPress={handleShare}
+                activeOpacity={0.7}
+              >
+                <LinearGradient
+                  colors={[BrandColors.teal, BrandColors.fuchsia]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.shareButtonGradient}
+                >
+                  <Text style={styles.shareButtonText}>📤 Share</Text>
+                </LinearGradient>
+              </TouchableOpacity>
             </LinearGradient>
           </Animated.View>
 
@@ -288,6 +341,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
+  },
+  shareButton: {
+    marginTop: 8,
+  },
+  shareButtonGradient: {
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: BrandColors.teal,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  shareButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: BrandColors.white,
+    letterSpacing: 0.3,
   },
   icon: {
     fontSize: 16,
