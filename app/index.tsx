@@ -40,7 +40,8 @@ import TimelineModal from '@/components/TimelineModal';
 export default function LandingScreen() {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [generateLoading, setGenerateLoading] = useState(false);
   const [userName, setUserName] = useState<string>('');
   const [showTimeline, setShowTimeline] = useState(false);
 
@@ -59,13 +60,17 @@ export default function LandingScreen() {
     saveUserName(text);
   };
 
-  const handleImagePicked = async (imageUri: string) => {
+  const handleImagePicked = async (imageUri: string, isUpload: boolean) => {
     if (!sessionId) {
       Alert.alert('Error', 'Session not initialized. Please try again.');
       return;
     }
 
-    setLoading(true);
+    if (isUpload) {
+      setUploadLoading(true);
+    } else {
+      setGenerateLoading(true);
+    }
 
     try {
       // Upload image to backend
@@ -80,7 +85,11 @@ export default function LandingScreen() {
       Alert.alert('Upload Error', 'Failed to upload image. Please try again.');
       console.error('Upload error:', error);
     } finally {
-      setLoading(false);
+      if (isUpload) {
+        setUploadLoading(false);
+      } else {
+        setGenerateLoading(false);
+      }
     }
   };
 
@@ -103,7 +112,7 @@ export default function LandingScreen() {
     });
 
     if (!result.canceled && result.assets[0]) {
-      await handleImagePicked(result.assets[0].uri);
+      await handleImagePicked(result.assets[0].uri, true);
     }
   };
 
@@ -115,8 +124,6 @@ export default function LandingScreen() {
       return;
     }
 
-    setLoading(true);
-
     try {
       // Download blank image to local file system using new File API
       const fileName = `blank_${Date.now()}.png`;
@@ -124,11 +131,11 @@ export default function LandingScreen() {
 
       await File.downloadFileAsync(BLANK_IMAGE_URL, file);
 
-      await handleImagePicked(file.uri);
+      await handleImagePicked(file.uri, false);
     } catch (error) {
       Alert.alert('Error', 'Failed to load blank image. Please try again.');
       console.error('Generate error:', error);
-      setLoading(false);
+      setGenerateLoading(false);
     }
   };
 
@@ -183,9 +190,9 @@ export default function LandingScreen() {
           <View style={styles.buttonContainer}>
             <Animated.View entering={FadeInDown.delay(200).duration(600)}>
               <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[styles.button, (uploadLoading || generateLoading) && styles.buttonDisabled]}
                 onPress={handleUploadFromGallery}
-                disabled={loading}
+                disabled={uploadLoading || generateLoading}
                 activeOpacity={0.8}
               >
                 <LinearGradient
@@ -194,7 +201,7 @@ export default function LandingScreen() {
                   end={{ x: 1, y: 0 }}
                   style={styles.buttonGradient}
                 >
-                  {loading ? (
+                  {uploadLoading ? (
                     <ActivityIndicator size="large" color="#ffffff" />
                   ) : (
                     <Text style={styles.buttonText}>Upload</Text>
@@ -205,13 +212,13 @@ export default function LandingScreen() {
 
             <Animated.View entering={FadeInDown.delay(400).duration(600)}>
               <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
+                style={[styles.button, (uploadLoading || generateLoading) && styles.buttonDisabled]}
                 onPress={handleGenerate}
-                disabled={loading}
+                disabled={uploadLoading || generateLoading}
                 activeOpacity={0.8}
               >
                 <View style={[styles.buttonGradient, styles.generateButton]}>
-                  {loading ? (
+                  {generateLoading ? (
                     <ActivityIndicator size="large" color="#000000" />
                   ) : (
                     <Text style={styles.generateButtonText}>Generate</Text>
