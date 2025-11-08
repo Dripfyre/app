@@ -8,13 +8,14 @@ import {
   RecordingPresets,
   getRecordingPermissionsAsync,
   requestRecordingPermissionsAsync,
+  setAudioModeAsync,
   useAudioRecorder,
   useAudioRecorderState
 } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -37,6 +38,23 @@ export default function VoiceButton({ onRecordingComplete, disabled }: VoiceButt
   // Animation values
   const scale = useSharedValue(1);
   const pulseOpacity = useSharedValue(1);
+
+  // Set audio mode on mount to allow recording on iOS
+  useEffect(() => {
+    const setupAudioMode = async () => {
+      if (Platform.OS === 'ios') {
+        try {
+          await setAudioModeAsync({
+            allowsRecording: true,
+            playsInSilentMode: true,
+          });
+        } catch (error) {
+          console.error('Failed to set audio mode:', error);
+        }
+      }
+    };
+    setupAudioMode();
+  }, []);
 
   useEffect(() => {
     if (isRecording) {
@@ -87,6 +105,14 @@ export default function VoiceButton({ onRecordingComplete, disabled }: VoiceButt
       if (finalStatus !== 'granted') {
         alert('Microphone permission is required to use voice commands. Please enable it in your device settings.');
         return;
+      }
+
+      // Ensure audio mode is set to allow recording on iOS
+      if (Platform.OS === 'ios') {
+        await setAudioModeAsync({
+          allowsRecording: true,
+          playsInSilentMode: true,
+        });
       }
 
       // Prepare and start recording
