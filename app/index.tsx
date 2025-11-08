@@ -19,7 +19,6 @@ import {
   Dimensions,
   Image,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -30,12 +29,7 @@ import {
 } from 'react-native';
 import Animated, {
   FadeIn,
-  FadeInDown,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming
+  FadeInDown
 } from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
@@ -50,9 +44,6 @@ export default function LandingScreen() {
   const [userName, setUserName] = useState<string>('');
   const [showTimeline, setShowTimeline] = useState(false);
 
-  // Animated value for glowing arrows
-  const arrowGlow = useSharedValue(1);
-
   useEffect(() => {
     // Generate session ID on mount
     const newSessionId = generateSessionId();
@@ -61,16 +52,6 @@ export default function LandingScreen() {
 
     // Load or generate user name
     getUserName().then(setUserName);
-
-    // Start glowing animation for arrows
-    arrowGlow.value = withRepeat(
-      withSequence(
-        withTiming(1.5, { duration: 1000 }),
-        withTiming(1, { duration: 1000 })
-      ),
-      -1,
-      false
-    );
   }, []);
 
   const handleNameChange = (text: string) => {
@@ -156,14 +137,6 @@ export default function LandingScreen() {
     setShowTimeline(true);
   };
 
-  // Animated style for glowing arrows
-  const arrowAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: arrowGlow.value,
-      transform: [{ scale: arrowGlow.value }],
-    };
-  });
-
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView
@@ -204,67 +177,61 @@ export default function LandingScreen() {
                   maxLength={30}
                 />
               </Animated.View>
-
-              <View style={styles.buttonContainer}>
-                <Animated.View entering={FadeInDown.delay(200).duration(600)}>
-                  <TouchableOpacity
-                    style={[styles.button, loading && styles.buttonDisabled]}
-                    onPress={handleUploadFromGallery}
-                    disabled={loading}
-                    activeOpacity={0.8}
-                  >
-                    <LinearGradient
-                      colors={['#00E0C0', '#FF0080']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.buttonGradient}
-                    >
-                      {loading ? (
-                        <ActivityIndicator size="large" color="#ffffff" />
-                      ) : (
-                        <Text style={styles.buttonText}>Upload</Text>
-                      )}
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </Animated.View>
-
-                <Animated.View entering={FadeInDown.delay(400).duration(600)}>
-                  <TouchableOpacity
-                    style={[styles.button, loading && styles.buttonDisabled]}
-                    onPress={handleGenerate}
-                    disabled={loading}
-                    activeOpacity={0.8}
-                  >
-                    <View style={[styles.buttonGradient, styles.generateButton]}>
-                      {loading ? (
-                        <ActivityIndicator size="large" color="#000000" />
-                      ) : (
-                        <Text style={styles.generateButtonText}>Generate!</Text>
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                </Animated.View>
-              </View>
             </View>
           </View>
 
-          {/* Glowing Arrows for Timeline - at bottom */}
-          <Animated.View entering={FadeInDown.delay(600).duration(800)} style={styles.timelineIndicator}>
+          <View style={styles.buttonContainer}>
+            <Animated.View entering={FadeInDown.delay(200).duration(600)}>
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleUploadFromGallery}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={['#00E0C0', '#FF0080']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.buttonGradient}
+                >
+                  {loading ? (
+                    <ActivityIndicator size="large" color="#ffffff" />
+                  ) : (
+                    <Text style={styles.buttonText}>Upload</Text>
+                  )}
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
+
+            <Animated.View entering={FadeInDown.delay(400).duration(600)}>
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleGenerate}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.buttonGradient, styles.generateButton]}>
+                  {loading ? (
+                    <ActivityIndicator size="large" color="#000000" />
+                  ) : (
+                    <Text style={styles.generateButtonText}>Generate!</Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+
+          {/* Timeline indicator - static - pinned to bottom */}
+          <View style={styles.timelineIndicator}>
             <TouchableOpacity
               onPress={handleOpenTimeline}
               activeOpacity={0.7}
               style={styles.arrowContainer}
             >
-              <Animated.View style={arrowAnimatedStyle}>
-                <View style={styles.arrowsRow}>
-                  <Text style={styles.arrow}>↓</Text>
-                  <Text style={[styles.arrow, styles.arrowMiddle]}>↓</Text>
-                  <Text style={styles.arrow}>↓</Text>
-                </View>
-                <Text style={styles.timelineHint}>Tap for Timeline</Text>
-              </Animated.View>
+              <Text style={styles.timelineHint}>Timeline</Text>
+              <Text style={styles.timelineArrow}>↓</Text>
             </TouchableOpacity>
-          </Animated.View>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -299,8 +266,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 150,
     marginBottom: 4,
   },
   nameInputContainer: {
@@ -362,7 +329,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
-    marginBottom: 10,
+    paddingTop: 20,
+    paddingBottom: 20,
+    backgroundColor: '#000000',
   },
   button: {
     flex: 1,
@@ -415,38 +384,26 @@ const styles = StyleSheet.create({
   },
   timelineIndicator: {
     alignItems: 'center',
-    paddingTop: 10,
-    paddingBottom: 50,
+    paddingTop: 30,
+    paddingBottom: 40,
     backgroundColor: '#000000',
   },
   arrowContainer: {
     alignItems: 'center',
     gap: 8,
-    paddingVertical: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 50,
   },
-  arrowsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  arrow: {
-    fontSize: 36,
-    color: '#00E0C0',
+  timelineArrow: {
+    fontSize: 64,
+    color: 'rgba(255, 255, 255, 0.95)',
     fontWeight: '800',
-    textShadowColor: '#00E0C0',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 15,
-  },
-  arrowMiddle: {
-    fontSize: 42,
-    textShadowRadius: 20,
+    lineHeight: 64,
   },
   timelineHint: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.8)',
-    letterSpacing: 0.8,
-    marginTop: 2,
+    fontSize: 24,
+    fontWeight: '800',
+    color: 'rgba(255, 255, 255, 0.95)',
+    letterSpacing: 1.2,
   },
 });
