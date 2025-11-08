@@ -119,3 +119,34 @@ export async function editWithVoice(sessionId: string, audioUri: string): Promis
     throw error;
   }
 }
+
+/**
+ * Post session with user name
+ */
+export async function postSession(sessionId: string, name: string): Promise<void> {
+  try {
+    console.log("Making post call", new Date().toISOString());
+    console.log("Name:", name);
+    const url = `${API_BASE_URL}${API_ENDPOINTS.post(sessionId)}`;
+    console.log("Sending post request to:", url);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name }),
+    });
+
+    console.log("Post response status:", response.status);
+
+    if (!response.ok) {
+      throw new Error(`Post failed: ${response.status}`);
+    }
+
+    console.log("Post successful");
+  } catch (error) {
+    console.error('Post error:', error);
+    throw error;
+  }
+}

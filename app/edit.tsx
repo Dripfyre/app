@@ -7,7 +7,8 @@ import CaptionBox from '@/components/CaptionBox';
 import ImageDisplay from '@/components/ImageDisplay';
 import VoiceButton from '@/components/VoiceButton';
 import { BrandColors } from '@/constants/theme';
-import { editWithVoice, syncSession } from '@/services/api';
+import { editWithVoice, postSession, syncSession } from '@/services/api';
+import { getUserName } from '@/utils/userName';
 import { File, Paths } from 'expo-file-system';
 import { EncodingType, writeAsStringAsync } from 'expo-file-system/legacy';
 import * as Haptics from 'expo-haptics';
@@ -96,6 +97,10 @@ export default function EditScreen() {
 
     try {
       setLoading(true);
+
+      // Get user name and call post API
+      const userName = await getUserName();
+      await postSession(sessionId, userName);
 
       let finalImageUri: string;
 
