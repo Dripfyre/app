@@ -3,16 +3,16 @@
  * Shows posted image with caption and hashtag, and options to start new session
  */
 
+import TimelineModal from '@/components/TimelineModal';
 import { BrandColors } from '@/constants/theme';
 import { clearSessionId } from '@/utils/session';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Sharing from 'expo-sharing';
 import { useLocalSearchParams } from 'expo-router';
+import * as Sharing from 'expo-sharing';
 import React, { useEffect, useState } from 'react';
-import TimelineModal from '@/components/TimelineModal';
 import {
   Alert,
   ScrollView,
@@ -156,7 +156,7 @@ export default function SuccessScreen() {
               activeOpacity={0.7}
               style={styles.arrowContainer}
             >
-              <Text style={styles.timelineHint}>Timeline</Text>
+              <Text style={styles.timelineHint}>Catch-Up!</Text>
               <Text style={styles.timelineArrow}>↓</Text>
             </TouchableOpacity>
           </View>

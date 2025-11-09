@@ -267,7 +267,7 @@ export default function LandingScreen() {
               activeOpacity={0.7}
               style={styles.arrowContainer}
             >
-              <Text style={styles.timelineHint}>Timeline</Text>
+              <Text style={styles.timelineHint}>Catch-Up!</Text>
               <Text style={styles.timelineArrow}>↓</Text>
             </TouchableOpacity>
           </View>
