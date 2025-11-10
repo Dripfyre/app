@@ -5,11 +5,10 @@
 
 import ApiSettingsModal from '@/components/ApiSettingsModal';
 import TimelineModal from '@/components/TimelineModal';
-import { BLANK_IMAGE_URL, initializeApiUrl } from '@/constants/config';
+import { initializeApiUrl } from '@/constants/config';
 import { uploadImage } from '@/services/api';
 import { generateSessionId, saveSessionId } from '@/utils/session';
 import { getUserName, saveUserName } from '@/utils/userName';
-import { File, Paths } from 'expo-file-system';
 import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -40,8 +39,7 @@ const { width } = Dimensions.get('window');
 export default function LandingScreen() {
   const router = useRouter();
   const [sessionId, setSessionId] = useState<string>('');
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [generateLoading, setGenerateLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
   const [userName, setUserName] = useState<string>('');
   const [showTimeline, setShowTimeline] = useState(false);
   const [showApiSettings, setShowApiSettings] = useState(false);
@@ -68,17 +66,13 @@ export default function LandingScreen() {
     saveUserName(text);
   };
 
-  const handleImagePicked = async (imageUri: string, isUpload: boolean) => {
+  const handleImagePicked = async (imageUri: string) => {
     if (!sessionId) {
       Alert.alert('Error', 'Session not initialized. Please try again.');
       return;
     }
 
-    if (isUpload) {
-      setUploadLoading(true);
-    } else {
-      setGenerateLoading(true);
-    }
+    setImageLoading(true);
 
     try {
       // Upload image to backend
@@ -93,17 +87,11 @@ export default function LandingScreen() {
       Alert.alert('Upload Error', 'Failed to upload image. Please try again.');
       console.error('Upload error:', error);
     } finally {
-      if (isUpload) {
-        setUploadLoading(false);
-      } else {
-        setGenerateLoading(false);
-      }
+      setImageLoading(false);
     }
   };
 
-  const handleUploadFromGallery = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
+  const handleSelectFromGallery = async () => {
     // Request permissions
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -120,31 +108,38 @@ export default function LandingScreen() {
     });
 
     if (!result.canceled && result.assets[0]) {
-      await handleImagePicked(result.assets[0].uri, true);
+      await handleImagePicked(result.assets[0].uri);
     }
   };
 
-  const handleGenerate = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleTakePhoto = async () => {
+    // Request camera permissions
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
-    if (!sessionId) {
-      Alert.alert('Error', 'Session not initialized. Please try again.');
+    if (!permissionResult.granted) {
+      Alert.alert('Permission Required', 'Please grant permission to access your camera.');
       return;
     }
 
-    try {
-      // Download blank image to local file system using new File API
-      const fileName = `blank_${Date.now()}.png`;
-      const file = new File(Paths.cache, fileName);
+    // Launch camera
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      quality: 0.8,
+    });
 
-      await File.downloadFileAsync(BLANK_IMAGE_URL, file);
-
-      await handleImagePicked(file.uri, false);
-    } catch (error) {
-      Alert.alert('Error', 'Failed to load blank image. Please try again.');
-      console.error('Generate error:', error);
-      setGenerateLoading(false);
+    if (!result.canceled && result.assets[0]) {
+      await handleImagePicked(result.assets[0].uri);
     }
+  };
+
+  const handleCameraButtonPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    handleTakePhoto();
+  };
+
+  const handleGalleryButtonPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    handleSelectFromGallery();
   };
 
   const handleOpenTimeline = () => {
@@ -222,9 +217,9 @@ export default function LandingScreen() {
           <View style={styles.buttonContainer}>
             <Animated.View entering={FadeInDown.delay(200).duration(600)}>
               <TouchableOpacity
-                style={[styles.button, (uploadLoading || generateLoading) && styles.buttonDisabled]}
-                onPress={handleUploadFromGallery}
-                disabled={uploadLoading || generateLoading}
+                style={[styles.button, imageLoading && styles.buttonDisabled]}
+                onPress={handleGalleryButtonPress}
+                disabled={imageLoading}
                 activeOpacity={0.8}
               >
                 <LinearGradient
@@ -233,10 +228,10 @@ export default function LandingScreen() {
                   end={{ x: 1, y: 0 }}
                   style={styles.buttonGradient}
                 >
-                  {uploadLoading ? (
+                  {imageLoading ? (
                     <ActivityIndicator size="large" color="#ffffff" />
                   ) : (
-                    <Text style={styles.buttonText}>Upload</Text>
+                    <Text style={styles.buttonText}>Gallery</Text>
                   )}
                 </LinearGradient>
               </TouchableOpacity>
@@ -244,16 +239,16 @@ export default function LandingScreen() {
 
             <Animated.View entering={FadeInDown.delay(400).duration(600)}>
               <TouchableOpacity
-                style={[styles.button, (uploadLoading || generateLoading) && styles.buttonDisabled]}
-                onPress={handleGenerate}
-                disabled={uploadLoading || generateLoading}
+                style={[styles.button, imageLoading && styles.buttonDisabled]}
+                onPress={handleCameraButtonPress}
+                disabled={imageLoading}
                 activeOpacity={0.8}
               >
-                <View style={[styles.buttonGradient, styles.generateButton]}>
-                  {generateLoading ? (
+                <View style={[styles.buttonGradient, styles.cameraButton]}>
+                  {imageLoading ? (
                     <ActivityIndicator size="large" color="#000000" />
                   ) : (
-                    <Text style={styles.generateButtonText}>Generate</Text>
+                    <Text style={styles.cameraButtonText}>Camera</Text>
                   )}
                 </View>
               </TouchableOpacity>
@@ -405,7 +400,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     letterSpacing: 0.3,
   },
-  generateButton: {
+  cameraButton: {
     backgroundColor: '#A0FF00',
     borderRadius: 32,
     // Intense glow effect for lime green button
@@ -418,7 +413,7 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 24,
   },
-  generateButtonText: {
+  cameraButtonText: {
     fontSize: 19,
     fontWeight: '800',
     color: '#000000',
